@@ -34,7 +34,7 @@ Con la misma versión de Python y los mismos parámetros se obtienen las mismas 
 
 El notebook no escribe archivos ni depende de resultados de ejecuciones anteriores. Las celdas se guardan sin salidas para que el repositorio sólo versione código y explicaciones, no resultados transitorios.
 
-Git registra los cambios locales en la rama actual. Cuando esta mejora esté verificada, el flujo habitual es: revisar el diff, crear un commit descriptivo, hacer push de la rama `rfc-001-notebook-reproducible` y abrir un pull request en GitHub.
+Git registra los cambios locales en la rama actual. Cuando una mejora esté verificada, el flujo habitual es: revisar el diff, crear un commit descriptivo, hacer push de la rama de trabajo y abrir un pull request en GitHub.
 
 ## Reglas verificadas
 
@@ -58,4 +58,15 @@ src/poker_sim/   # modelo de cartas y evaluador
 tests/           # pruebas unitarias y validación exhaustiva
 poker_simulacion.ipynb  # exploración reproducible de la simulación
 ```
+
+## Análisis estadístico
+
+El notebook compara cada categoría observada con su probabilidad teórica exacta.
+Para cada una informa el conteo, el porcentaje observado, el porcentaje teórico,
+la cantidad esperada para el tamaño de muestra y el error en puntos porcentuales.
+
+Una diferencia no implica por sí sola un error del programa: la simulación tiene
+variación aleatoria. Para evaluar el efecto del tamaño muestral, mantené la misma
+`SEMILLA` y aumentá `NUMERO_DE_MANOS`; para generar otra muestra, cambiá la
+semilla.
 

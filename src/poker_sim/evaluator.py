@@ -6,6 +6,7 @@ from collections import Counter
 from dataclasses import dataclass
 from enum import IntEnum
 from itertools import product
+from math import comb
 from typing import Iterable
 
 
@@ -57,6 +58,19 @@ NOMBRES_CATEGORIA = {
     Categoria.ESCALERA_DE_COLOR: "Escalera de color",
     Categoria.ESCALERA_REAL: "Escalera real",
 }
+TOTAL_MANOS_POSIBLES = comb(52, 5)
+CONTEOS_TEORICOS = {
+    Categoria.ESCALERA_REAL: 4,
+    Categoria.ESCALERA_DE_COLOR: 36,
+    Categoria.POKER: 624,
+    Categoria.FULL_HOUSE: 3744,
+    Categoria.COLOR: 5108,
+    Categoria.ESCALERA: 10200,
+    Categoria.TRIO: 54912,
+    Categoria.DOBLE_PAREJA: 123552,
+    Categoria.PAREJA: 1098240,
+    Categoria.CARTA_ALTA: 1302540,
+}
 
 
 @dataclass(frozen=True)
@@ -73,6 +87,31 @@ class EvaluacionMano:
     @property
     def nombre(self) -> str:
         return NOMBRES_CATEGORIA[self.categoria]
+
+
+@dataclass(frozen=True)
+class EstadisticaCategoria:
+    """Comparación transparente entre la simulación y el valor exacto."""
+
+    categoria: Categoria
+    observadas: int
+    total_muestra: int
+
+    @property
+    def porcentaje_observado(self) -> float:
+        return self.observadas / self.total_muestra
+
+    @property
+    def porcentaje_teorico(self) -> float:
+        return CONTEOS_TEORICOS[self.categoria] / TOTAL_MANOS_POSIBLES
+
+    @property
+    def esperadas_en_muestra(self) -> float:
+        return self.porcentaje_teorico * self.total_muestra
+
+    @property
+    def error_puntos_porcentuales(self) -> float:
+        return (self.porcentaje_observado - self.porcentaje_teorico) * 100
 
 
 def mazo_estandar() -> tuple[Card, ...]:
@@ -136,3 +175,18 @@ def evaluar_mano(mano: Iterable[Card]) -> EvaluacionMano:
         restantes = sorted((rango for rango in rangos if rango != pareja), reverse=True)
         return EvaluacionMano(Categoria.PAREJA, (pareja, *restantes))
     return EvaluacionMano(Categoria.CARTA_ALTA, tuple(sorted(rangos, reverse=True)))
+
+
+def resumir_estadisticas(
+    evaluaciones: Iterable[EvaluacionMano],
+) -> tuple[EstadisticaCategoria, ...]:
+    """Devuelve una fila por categoría, incluso si no apareció en la muestra."""
+
+    conteos = Counter(evaluacion.categoria for evaluacion in evaluaciones)
+    total_muestra = sum(conteos.values())
+    if total_muestra == 0:
+        raise ValueError("Se necesita al menos una evaluación.")
+    return tuple(
+        EstadisticaCategoria(categoria, conteos[categoria], total_muestra)
+        for categoria in CATEGORIAS_EN_ORDEN
+    )
