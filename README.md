@@ -36,3 +36,26 @@ El notebook no escribe archivos ni depende de resultados de ejecuciones anterior
 
 Git registra los cambios locales en la rama actual. Cuando esta mejora esté verificada, el flujo habitual es: revisar el diff, crear un commit descriptivo, hacer push de la rama `rfc-001-notebook-reproducible` y abrir un pull request en GitHub.
 
+## Reglas verificadas
+
+El evaluador estable está en `src/poker_sim/`. Además de indicar la categoría,
+devuelve una puntuación ordenable para desempatar dos manos. Las pruebas se
+ejecutan sin dependencias externas:
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+Incluyen ejemplos de cada categoría, desempates y una comprobación exhaustiva
+de las 2.598.960 manos posibles. Los conteos esperados son, entre otros:
+`1.098.240` parejas (42,2569 %), `123.552` dobles parejas (4,7539 %) y
+`54.912` tríos (2,1128 %).
+
+## Estructura
+
+```text
+src/poker_sim/   # modelo de cartas y evaluador
+tests/           # pruebas unitarias y validación exhaustiva
+poker_simulacion.ipynb  # exploración reproducible de la simulación
+```
+
